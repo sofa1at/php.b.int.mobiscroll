@@ -1,0 +1,20 @@
+{
+  "name": "sofa1at/mobiscrollinterpreter",
+  "description": "converts sofa 1 businesshours and timetables to mobiscroll invalid/valid objects",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "zec",
+      "email": "develop@sofa1.at"
+    }
+  ],
+  "homepage": "https://github.com/sofa1at/php-mobiscrollinterpreter",
+  "require": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Sofa1\\Mobiscroll\\": "Sofa1/Mobiscroll/"
+    }
+  }
+}
