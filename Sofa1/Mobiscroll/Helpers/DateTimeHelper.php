@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Sofa1\Mobiscroll;
+namespace Sofa1\Mobiscroll\Helpers;
 
 use DateTime;
 use Exception;
