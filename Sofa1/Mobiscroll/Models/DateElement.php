@@ -41,12 +41,12 @@ class DateElement extends AbstractDateElement
 		switch ($this->method)
 		{
 			case DateOutputMethod::SpecificDayEveryYear:
-				return sprintf("'%s'", $this->date->format("M/Y"));
+				return sprintf("'%s'", $this->date->format("m/d"));
 				break;
 			case DateOutputMethod::SpecificDay:
-				return sprintf("new Date(%s,%s,%s)",
+				return sprintf("'%s-%s-%s'",
 					$this->date->format("Y"),
-					$this->date->format("m") - 1,
+					$this->date->format("m"),
 					$this->date->format("d"));
 				break;
 		}
