@@ -14,7 +14,9 @@
   },
   "autoload": {
     "psr-4": {
-      "Sofa1\\Mobiscroll\\": "Sofa1/Mobiscroll/"
+      "Sofa1\\Mobiscroll\\": "Sofa1/Mobiscroll/",
+      "Sofa1\\Mobiscroll\\Helpers\\": "Sofa1/Mobiscroll/Helpers/",
+      "Sofa1\\Mobiscroll\\Models\\": "Sofa1/Mobiscroll/Models/"
     }
   }
 }
