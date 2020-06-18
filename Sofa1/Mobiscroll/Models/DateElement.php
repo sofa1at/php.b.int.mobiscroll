@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Sofa1\Mobiscroll;
+namespace Sofa1\Mobiscroll\Models;
 
 
 use DateTime;
 use Exception;
-use Sofa1\Mobiscroll\Models\AbstractDateElement;
+use Sofa1\Mobiscroll\DateOutputMethod;
 
 class DateElement extends AbstractDateElement
 {

@@ -3,6 +3,11 @@
 
 namespace Sofa1\Mobiscroll;
 
+use Sofa1\Mobiscroll\Helpers\DateTimeHelper;
+use Sofa1\Mobiscroll\Models\AbstractBusinessHours;
+use Sofa1\Mobiscroll\Models\WeekDayElement;
+use Sofa1\Mobiscroll\Models\WeekdayTimeRangeElement;
+
 class Sofa1MobiscrollConverter
 {
 	/**
