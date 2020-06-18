@@ -11,16 +11,19 @@ use Sofa1\Mobiscroll\Models\AbstractDateElement;
 
 class DateTimeRangeElement extends AbstractDateElement
 {
-
 	/**
 	 * @var DateTime
 	 */
-	public $from;
+	public $date;
+	/**
+	 * @var string
+	 */
+	public $fromTime;
 
 	/**
-	 * @var DateTime
+	 * @var string
 	 */
-	public $to;
+	public $toTime;
 
 	/**
 	 * @var string
@@ -29,16 +32,18 @@ class DateTimeRangeElement extends AbstractDateElement
 
 	/**
 	 * DateTimeRangeElement constructor.
+	 **
 	 *
-	 * @param DateTime $from
-	 * @param DateTime $to
-	 * @param string $method
+	 * @param DateTime $date
+	 * @param string $fromTime
+	 * @param string $toTime
 	 */
-	public function __construct($from, $to, $method)
+	public function __construct($date, $fromTime, $toTime)
 	{
-		$this->from = $from;
-		$this->to = $to;
-		$this->method = $method;
+		$this->date = $date;
+		$this->fromTime = $fromTime;
+		$this->toTime = $toTime;
+
 	}
 
 	/**
@@ -47,22 +52,12 @@ class DateTimeRangeElement extends AbstractDateElement
 	 */
 	public function ToString()
 	{
-		switch ($this->method)
-		{
-			case DateOutputMethod::EveryDayTimeRange:
-				return sprintf("{start:'%s', end:'%s'}",
-					$this->from->format("H:i"),
-					$this->to->format("H:i"));
-				break;
-			case DateOutputMethod::SpecificDayTimeRange:
-				return sprintf("{d: new Date(%s,%s,%s), start:'%s', end:'%s' }",
-					$this->from->format("Y"),
-					$this->from->format("m") - 1,
-					$this->from->format("d"),
-					$this->from->format("H:i"),
-					$this->to->format("H:i"));
-		}
+		return sprintf("{d: new Date(%s,%s,%s), start:'%s', end:'%s' }",
+			$this->date->format("Y"),
+			$this->date->format("m") - 1,
+			$this->date->format("d"),
+			$this->fromTime,
+			$this->toTime);
 
-		throw new Exception("method not provided on DateTimeRangeElement");
 	}
 }

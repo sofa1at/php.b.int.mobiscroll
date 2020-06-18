@@ -5,6 +5,7 @@ namespace Sofa1\Mobiscroll;
 
 
 use Sofa1\Mobiscroll\Models\AbstractDateElement;
+use Sofa1\Mobiscroll\Models\WeekdayTimeRangeElement;
 
 class DateElementCollection
 {
@@ -13,9 +14,20 @@ class DateElementCollection
 	 */
 	private $Items = array();
 
+	/**
+	 * @param AbstractDateElement $element
+	 */
 	public function Add($element)
 	{
 		$this->Items[] = $element;
+	}
+
+	/**
+	 * @param int $weekday
+	 */
+	public function AddWeekday($weekday)
+	{
+		$this->Items[] = new WeekdayTimeRangeElement($weekday, "00:00", "23:59", DateOutputMethod::EveryWeekDayTimeRange);
 	}
 
 	/**
