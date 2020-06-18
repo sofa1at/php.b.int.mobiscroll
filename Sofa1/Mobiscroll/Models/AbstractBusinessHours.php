@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Sofa1\Mobiscroll;
+namespace Sofa1\Mobiscroll\Models;
 
 
 class AbstractBusinessHours
