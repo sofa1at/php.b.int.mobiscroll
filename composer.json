@@ -1,7 +1,7 @@
 {
   "name": "sofa1at/mobiscrollinterpreter",
   "description": "converts sofa 1 businesshours and timetables to mobiscroll invalid/valid objects",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "license": "proprietary",
   "authors": [
     {
