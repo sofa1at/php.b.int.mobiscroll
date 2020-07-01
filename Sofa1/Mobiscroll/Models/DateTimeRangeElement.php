@@ -43,7 +43,6 @@ class DateTimeRangeElement extends AbstractDateElement
 		$this->date = $date;
 		$this->fromTime = $fromTime;
 		$this->toTime = $toTime;
-
 	}
 
 	/**

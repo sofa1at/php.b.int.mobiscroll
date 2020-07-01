@@ -3,245 +3,284 @@
 
 namespace Sofa1\Mobiscroll;
 
+use App\TimeSettings\TimeSetting;
+use Cassandra\Date;
 use DateInterval;
+use DatePeriod;
 use DateTime;
+use Exception;
 use Sofa1\Mobiscroll\Helpers\DateTimeHelper;
 use Sofa1\Mobiscroll\Models\AbstractBusinessHours;
 use Sofa1\Mobiscroll\Models\AbstractTimeSetting;
 use Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriod;
 use Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriodDay;
+use Sofa1\Mobiscroll\Models\DateTimeRangeElement;
 use Sofa1\Mobiscroll\Models\WeekDayElement;
-use Sofa1\Mobiscroll\Models\WeekdayTimeRangeElement;
 
 class Sofa1MobiscrollConverter
 {
 
-    /**
-     * @var DateTimeValidation
-     */
-    private $validation;
+	/**
+	 * @var DateTimeValidation
+	 */
+	private $validation;
 
-    /**
-     * @var AbstractBusinessHours[]
-     */
-    private $businessHours;
+	/**
+	 * @var AbstractTimeSetting[]
+	 */
+	private $timeSettings;
 
-    /**
-     * @var AbstractTimeSetting[]
-     */
-    private $timeSettings;
+	/**
+	 * @var DateTimeRangeElement[]
+	 */
+	private $businessHolidays;
 
-    /**
-     * @var int $max
-     */
-    private $max;
+	/**
+	 * @var int $max
+	 */
+	private $max;
 
-    /**
-     * @var DateTime
-     */
-    private $startDate;
+	/**
+	 * @var DateTime
+	 */
+	private $startDate;
 
-    public function __construct($max = 365, $startDate = null)
-    {
-        $this->businessHours = array();
-        $this->timeSettings = array();
-        $this->max = $max;
-        if ($startDate == null)
-        {
-            $this->startDate = new DateTime('now', new \DateTimeZone('UTC'));
-        }
-    }
+	public function __construct($max = 365, $startDate = null)
+	{
+		$this->timeSettings = array();
+		$this->max = $max;
+		if ($startDate == null)
+		{
+			$this->startDate = new DateTime('now', new \DateTimeZone('UTC'));
+		}
+	}
 
-    /**
-     * @param AbstractBusinessHours[] $businessHours
-     */
-    public function AddBusinessHours($businessHours)
-    {
-        $this->businessHours = array_merge($this->businessHours, $businessHours);
-    }
+	/**
+	 * @param AbstractBusinessHours[] $businessHours
+	 */
+	public function AddBusinessHours($businessHours)
+	{
+		// add time settings from today to max days
+		$timeSetting = new TimeSetting();
+		$period = new AbstractTimeSettingPeriod();
+		$period->FromDate = clone $this->startDate;
+		$lastDay = clone $this->startDate;
+		$lastDay->add(new DateInterval('P' . $this->max . "D"));
+		$period->ToDate = $lastDay;
+		$currentDay = clone $period->FromDate;
+		$timeSetting->TimeSettingPeriods[] = $period;
 
-    /**
-     * @param AbstractTimeSetting $timeSettings
-     */
-    public function AddTimeSettings($timeSettings)
-    {
-        $this->timeSettings[] = $timeSettings;
-    }
+		$bh = array();
+		foreach ($businessHours as $businessHour)
+		{
+			if ($businessHour->IsOpen)
+			{
+				$bh[strtolower($businessHour->Day)][] = $businessHour;
+			}
+		}
 
-    /**
-     * @return string
-     */
-    public function ToString()
-    {
-        $this->validation = new DateTimeValidation();
-        if ( ! empty($this->businessHours) && empty($this->timeSettings))
-        {
-            $this->ValidateBusinessHours();
-        }
-        else if ( ! empty($this->timeSettings) && empty($this->businessHours))
-        {
-            $this->ValidateTimeSettings();
-        }
-        else
-        {
-            $this->AddTimeSettings($this->ConvertBusinessHoursToTimeSetting());
-            $this->ValidateTimeSettings();
-        }
-
-        return $this->validation->ToString();
-    }
+		// add weekday periods
+		for ($i = 0; $i <= 6; $i ++)
+		{
+			$currentWeekday = $currentDay->format("l");
+			if ( ! empty($bh[strtolower($currentWeekday)]))
+			{
+				/** @var AbstractBusinessHours $item */
+				foreach ($bh[strtolower($currentWeekday)] as $item)
+				{
+					$tsPeriod = new AbstractTimeSettingPeriodDay();
+					$tsPeriod->Day = DateTimeHelper::GetWeekdayNumberFromString($currentWeekday, 'sunday');
+					$tsPeriod->FromTime = $item->From;
+					$tsPeriod->ToTime = $item->To;
+					$period->TimeSettingPeriodDays[] = $tsPeriod;
+				}
+			}
+			$currentDay->add(new DateInterval('P1D'));
+		}
 
 
-    public function ValidateBusinessHours()
-    {
-        if (empty($this->businessHours))
-        {
-            return null;
-        }
+		$this->AddTimeSettings($timeSetting);
+	}
 
-        $sortedBusinessHours = $this->GetBusinessHoursSorted($this->businessHours, 'sunday'); // sunday is needed for the mobiscroll control offset
-        for ($i = 0; $i <= 6; $i ++)
-        {
-            if ( ! empty($sortedBusinessHours[$i]) && count($sortedBusinessHours[$i]) > 0)
-            {
-                $valideElements = array();
-                $hasClosedElement = false;
-                foreach ($sortedBusinessHours[$i] as $businessHour)
-                {
-                    if ($sortedBusinessHours[$i][0]->IsOpen)
-                    {
-                        $valideElements[] = new WeekdayTimeRangeElement($i, $businessHour->From, $businessHour->To, DateOutputMethod::EveryWeekDayTimeRange);
-                    }
-                    else
-                    {
-                        $hasClosedElement = true;
-                        break;
-                    }
-                }
 
-                if ( ! $hasClosedElement && ! empty($valideElements))
-                {
-                    $this->validation->Invalid->AddWeekday($i);
-                    $this->validation->Valid->AddArray($valideElements);
-                }
-                else
-                {
-                    $this->validation->Invalid->Add(new WeekDayElement($i, DateOutputMethod::EveryWeekDay));
-                }
-            }
-            else
-            {
-                $this->validation->Invalid->Add(new WeekDayElement($i, DateOutputMethod::EveryWeekDay));
-            }
-        }
-    }
+	/**
+	 * @param AbstractTimeSetting $timeSettings
+	 */
+	public function AddTimeSettings($timeSettings)
+	{
+		$this->timeSettings[] = $timeSettings;
+	}
 
-    public function ValidateTimeSettings()
-    {
-        if (empty($this->timeSettings))
-        {
-            return;
-        }
+	/**
+	 * @param DateTime $start
+	 * @param DateTime $end
+	 */
+	public function AddBusinessHolidays($start, $end)
+	{
+		if ($start->format("Y-m-d") == $end->format("Y-m-d"))
+		{
+			$this->businessHolidays[$start->format("Ymd")][] = new DateTimeRangeElement($start, $start->format("H:i"), $end->format("H:i"));
 
-        for ($i = 0; $i < 7; $i ++)
-        {
-            $this->validation->Invalid->Add(new WeekDayElement($i, DateOutputMethod::EveryWeekDay));
-        }
+			return;
+		}
 
-        foreach ($this->timeSettings as $timeSetting)
-        {
-            $date = clone $this->startDate;
-            for ($i = 0; $i <= $this->max; $i ++)
-            {
-                foreach ($timeSetting->TimeSettingPeriods as $timeSettingPeriod)
-                {
-                    $fromDate = $timeSettingPeriod->FromDate->format("md");
-                    $toDate = $timeSettingPeriod->ToDate->format("md");
-                    if ($date->format("md") < $fromDate || $date->format("md") > $toDate)
-                    {
-                        continue;
-                    }
-                    if ( ! empty($timeSettingPeriod->TimeSettingPeriodDays))
-                    {
-                        foreach ($timeSettingPeriod->TimeSettingPeriodDays as $periodDay)
-                        {
-                            $dayofweek = $date->format('l');
-                            if ((is_null($periodDay->Day) ? true : $periodDay->Day == DateTimeHelper::GetWeekdayNumberFromString($dayofweek, 'sunday')))
-                            {
-                                $this->validation->AddValidDateTimeRange(clone $date, $periodDay->FromTime->format("H:i"), $periodDay->ToTime->format("H:i"));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        $this->validation->AddValidDateTimeRange(clone $date, "00:00", "23:59");
-                    }
-                }
+		$interval = DateInterval::createFromDateString('1 day');
+		$period = new DatePeriod($start, $interval, $end);
+		/** @var DateTime $dt */
+		foreach ($period as $dt)
+		{
+			if ($dt->format("Y-m-d") == $start->format("Y-m-d"))
+			{
+				// first element
+				$this->businessHolidays[$dt->format("Ymd")][] = new DateTimeRangeElement($dt, $start->format("H:i"), "23:59");
+				continue;
+			}
+			else if ($dt->format("Y-m-d") == $end->format("Y-m-d"))
+			{
+				// last element
+				$this->businessHolidays[$dt->format("Ymd")][] = new DateTimeRangeElement($dt, "00:00", $end->format("H:i"));
+				continue;
+			}
+			else
+			{
+				// element between start and end
+				$this->businessHolidays[$dt->format("Ymd")][] = new DateTimeRangeElement($dt, "00:00", "23:59");
+			}
+		}
+	}
 
-                $date->add(new DateInterval('P1D'));
-            }
-        }
-    }
+	/**
+	 * @return string
+	 * @throws Exception
+	 */
+	public function ToString()
+	{
+		$this->validation = new DateTimeValidation();
+		$this->ValidateTimeSettings();
 
-    /**
-     * @return AbstractTimeSetting|null
-     * @throws \Exception
-     */
-    private function ConvertBusinessHoursToTimeSetting()
-    {
-        if (empty($this->businessHours))
-        {
-            return null;
-        }
+		return $this->validation->ToString();
+	}
 
-        $startDate = clone $this->startDate;
-        $endDate = clone $this->startDate;
-        $endDate->add(new DateInterval('P' . $this->max . 'D'));
+	public function ValidateTimeSettings()
+	{
+		if (empty($this->timeSettings))
+		{
+			return;
+		}
 
-        $timeSetting = new AbstractTimeSetting();
-        $timeSettingPeriod = new AbstractTimeSettingPeriod();
-        $timeSettingPeriod->FromDate = $startDate;
-        $timeSettingPeriod->ToDate = $endDate;
+		for ($i = 0; $i < 7; $i ++)
+		{
+			$this->validation->Invalid->Add(new WeekDayElement($i, DateOutputMethod::EveryWeekDay));
+		}
 
-        foreach ($this->businessHours as $businessHour)
-        {
-            $periodDay = new AbstractTimeSettingPeriodDay();
-            $periodDay->Day = $businessHour->Day;
-            $periodDay->FromTime = new DateTime(sprintf("1990-01-01 %s", $businessHour->From));
-            $periodDay->ToTime = new DateTime(sprintf("1990-01-01 %s", $businessHour->To));
-            $timeSettingPeriod->TimeSettingPeriodDays[] = $periodDay;
-        }
-        $timeSetting->TimeSettingPeriods[] = $timeSettingPeriod;
+		foreach ($this->timeSettings as $timeSetting)
+		{
+			$date = clone $this->startDate;
+			for ($i = 0; $i <= $this->max; $i ++)
+			{
+				foreach ($timeSetting->TimeSettingPeriods as $timeSettingPeriod)
+				{
+					$fromDate = $timeSettingPeriod->FromDate->format("ymd");
+					$toDate = $timeSettingPeriod->ToDate->format("ymd");
+					if ($date->format("ymd") < $fromDate || $date->format("ymd") > $toDate)
+					{
+						continue;
+					}
 
-        return $timeSetting;
-    }
+					if ( ! empty($timeSettingPeriod->TimeSettingPeriodDays))
+					{
+						foreach ($timeSettingPeriod->TimeSettingPeriodDays as $periodDay)
+						{
+							$dayofweek = $date->format('l');
+							if ((is_null($periodDay->Day) ? true : $periodDay->Day == DateTimeHelper::GetWeekdayNumberFromString($dayofweek, 'sunday')))
+							{
+								$periodDate = clone $date;
+								$from = is_a($periodDay->FromTime, "\DateTime") ? $periodDay->FromTime->format("H:i") : $periodDay->FromTime;
+								$to = is_a($periodDay->ToTime, "\DateTime") ? $periodDay->ToTime->format("H:i") : $periodDay->ToTime;
 
-    private function GetBusinessHoursSorted($businessHours, $firstDayOfWeek = 'monday')
-    {
-        if (empty($businessHours))
-        {
-            return false;
-        }
-        $days = array();
-        foreach ($businessHours as $stationBusinessHour)
-        {
-            $days[DateTimeHelper::GetWeekdayNumberFromString($stationBusinessHour->Day, $firstDayOfWeek)][strtotime($stationBusinessHour->From)] = $stationBusinessHour;
-            ksort($days[DateTimeHelper::GetWeekdayNumberFromString($stationBusinessHour->Day, $firstDayOfWeek)]);
-        }
-        ksort($days);
-        $sort = array();
-        foreach ($days as $key => $value)
-        {
-            if (is_array($value))
-            {
-                foreach ($value as $time)
-                {
-                    $sort[$key][] = $time;
-                }
-            }
-        }
+								$this->TryAddValidDateTimeRange($periodDate, $from, $to);
+							}
+						}
+					}
+					else
+					{
+						$this->TryAddValidDateTimeRange(clone $date, "00:00", "23:59");
+					}
+				}
 
-        return $sort;
-    }
+				$date->add(new DateInterval('P1D'));
+			}
+		}
+	}
 
+	/**
+	 * Try to add ValidDate with respecting the businessholidays
+	 *
+	 * @param DateTime $date
+	 * @param string $from
+	 * @param string $to
+	 */
+	private function TryAddValidDateTimeRange($date, $from, $to)
+	{
+		$dateTimeRangeElements = $this->ValidateDateRange($date, $from, $to);
+		if ( ! empty($dateTimeRangeElements))
+		{
+			foreach ($dateTimeRangeElements as $dateTimeRangeElement)
+			{
+				$this->validation->AddValidDateTimeRange($dateTimeRangeElement->date, $dateTimeRangeElement->fromTime, $dateTimeRangeElement->toTime);
+			}
+		}
+	}
+
+	/**
+	 * @param DateTime $date
+	 * @param string $fromTime format [h:i]
+	 * @param string $toTime format [h:i]
+	 *
+	 * @return DateTimeRangeElement[]|void
+	 */
+	private function ValidateDateRange($date, $fromTime, $toTime)
+	{
+		if (empty($this->businessHolidays) || empty($this->businessHolidays[$date->format("Ymd")]))
+		{
+			return [new DateTimeRangeElement($date, $fromTime, $toTime)];
+		}
+
+		$fromTimeValue = strtotime($fromTime);
+		$toTimeValue = strtotime($toTime);
+
+		$holidays = $this->businessHolidays[$date->format("Ymd")];
+		/** @var DateTimeRangeElement $holiday */
+		foreach ($holidays as $holiday)
+		{
+			$holidayStart = strtotime($holiday->fromTime);
+			$holidayEnd = strtotime($holiday->toTime);
+			// if between start and end
+			if ($holidayStart > $fromTimeValue && $holidayEnd < $toTimeValue)
+			{
+				return [
+					new DateTimeRangeElement($date, date("H:i", $fromTimeValue), date("H:i", $holidayStart)),
+					new DateTimeRangeElement($date, date("H:i", $holidayEnd), date("H:i", $toTimeValue))
+				];
+			}
+			// if holiday end for endtime
+			else if ($holidayStart < $fromTimeValue && $holidayEnd < $toTimeValue)
+			{
+				return [new DateTimeRangeElement($date, date("H:i", $holidayEnd), date("H:i", $toTimeValue))];
+			}
+			// if holiday starts after fromtime
+			else if ($holidayStart > $fromTimeValue && $holidayEnd > $toTimeValue)
+			{
+				return [new DateTimeRangeElement($date, date("H:i", $fromTimeValue), date("H:i", $holidayEnd > $toTimeValue ? $holidayStart : $toTimeValue))];
+			}
+			// holiday overrides timeframe
+			else if ($holidayStart < $fromTimeValue && $holidayEnd > $toTimeValue)
+			{
+				return [];
+			}
+		}
+
+		// no match
+		return [];
+	}
 }
