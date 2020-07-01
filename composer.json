@@ -11,6 +11,7 @@
   ],
   "homepage": "https://github.com/sofa1at/php-mobiscrollinterpreter",
   "require": {
+    "netresearch/jsonmapper": "dev-master"
   },
   "autoload": {
     "psr-4": {
