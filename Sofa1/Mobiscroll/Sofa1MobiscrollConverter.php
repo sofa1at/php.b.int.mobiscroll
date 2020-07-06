@@ -3,8 +3,6 @@
 
 namespace Sofa1\Mobiscroll;
 
-use App\TimeSettings\TimeSetting;
-use Cassandra\Date;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -15,8 +13,10 @@ use Sofa1\Mobiscroll\Models\AbstractStationBusinessHolidayDto;
 use Sofa1\Mobiscroll\Models\AbstractTimeSetting;
 use Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriod;
 use Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriodDay;
+use Sofa1\Mobiscroll\Models\DateLabelElement;
 use Sofa1\Mobiscroll\Models\DateTimeRangeElement;
 use Sofa1\Mobiscroll\Models\WeekDayElement;
+use function Couchbase\defaultDecoder;
 
 class Sofa1MobiscrollConverter
 {
@@ -35,6 +35,9 @@ class Sofa1MobiscrollConverter
      * @var DateTimeRangeElement[]
      */
     private $businessHolidays;
+
+    /** @var DateLabelElement[] */
+    private $labels;
 
     /**
      * @var int $max
@@ -70,7 +73,7 @@ class Sofa1MobiscrollConverter
         $businessHours = array();
         $json = is_object($json) ? $json : json_decode($json);
         $this->mapper->mapArray($json, $businessHours, "Sofa1\Mobiscroll\Models\AbstractBusinessHours");
-	    $this->AddBusinessHours($businessHours);
+        $this->AddBusinessHours($businessHours);
     }
 
     /**
@@ -141,12 +144,12 @@ class Sofa1MobiscrollConverter
     public function AddBusinessHolidaysJson($json)
     {
         $json = is_object($json) ? $json : json_decode($json);
-        $businessHolidays = array();
-        $this->mapper->mapArray($json, $businessHolidays, "Sofa1\Mobiscroll\Models\AbstractStationBusinessHolidayDto");
-        if(!empty($businessHolidays)){
-            foreach ($businessHolidays as $businessHoliday){
+        $businessHolidays = $this->mapper->mapArray($json, array(), "Sofa1\Mobiscroll\Models\AbstractStationBusinessHolidayDto");
+        if (!empty($businessHolidays)) {
+
+            foreach ($businessHolidays as $businessHoliday) {
                 /** @var AbstractStationBusinessHolidayDto $businessHoliday */
-                $this->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To);
+                $this->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
             }
         }
     }
@@ -155,8 +158,10 @@ class Sofa1MobiscrollConverter
      * @param DateTime $start
      * @param DateTime $end
      */
-    public function AddBusinessHolidays($start, $end)
+    public function AddBusinessHolidays($start, $end, $text)
     {
+        $this->labels[] = new DateLabelElement($start, $end, $text);
+
         if ($start->format("Y-m-d") == $end->format("Y-m-d")) {
             $this->businessHolidays[$start->format("Ymd")][] = new DateTimeRangeElement($start, $start->format("H:i"), $end->format("H:i"));
 
@@ -293,5 +298,16 @@ class Sofa1MobiscrollConverter
 
         // no match
         return [];
+    }
+
+    public function GetLabels()
+    {
+        $returnValue = array();
+        if(!empty($this->labels)){
+            foreach ($this->labels as $label){
+                $returnValue[] = (string)$label;
+            }
+        }
+        return implode($returnValue);
     }
 }

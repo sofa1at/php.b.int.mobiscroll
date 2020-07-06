@@ -30,4 +30,9 @@ class AbstractBusinessHours
 	 * @var boolean
 	 */
 	public $IsOpen;
+
+    /**
+     * @var string
+     */
+	public $InfoText;
 }
