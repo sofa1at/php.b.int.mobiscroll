@@ -1,7 +1,7 @@
 {
   "name": "sofa1at/mobiscrollinterpreter",
   "description": "converts sofa 1 businesshours and timetables to mobiscroll invalid/valid objects",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
     {
@@ -11,7 +11,7 @@
   ],
   "homepage": "https://github.com/sofa1at/php-mobiscrollinterpreter",
   "require": {
-    "netresearch/jsonmapper": "dev-master"
+    "netresearch/jsonmapper": "^3"
   },
   "autoload": {
     "psr-4": {
