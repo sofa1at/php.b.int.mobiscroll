@@ -213,9 +213,9 @@ class Sofa1MobiscrollConverter
             $date = clone $this->startDate;
             for ($i = 0; $i <= $this->max; $i++) {
                 foreach ($timeSetting->TimeSettingPeriods as $timeSettingPeriod) {
-                    $fromDate = $timeSettingPeriod->FromDate->format("ymd");
-                    $toDate = $timeSettingPeriod->ToDate->format("ymd");
-                    if ($date->format("ymd") < $fromDate || $date->format("ymd") > $toDate) {
+                    $fromDate = $timeSettingPeriod->FromDate->format("md");
+                    $toDate = $timeSettingPeriod->ToDate->format("md");
+                    if ($date->format("md") < $fromDate || $date->format("md") > $toDate) {
                         continue;
                     }
 
