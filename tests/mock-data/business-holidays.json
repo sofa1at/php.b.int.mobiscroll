@@ -1,0 +1,27 @@
+{
+  "Id": 97,
+  "StationId": 157,
+  "From": {
+    "date": "2020-11-16 09:30:25.000000",
+    "timezone_type": 3,
+    "timezone": "Europe\/Berlin"
+  },
+  "To": {
+    "date": "2020-11-19 09:30:25.000000",
+    "timezone_type": 3,
+    "timezone": "Europe\/Berlin"
+  },
+  "InfoText": "Urlaub",
+  "CreatedBy": "f.koechl@sofa1.at",
+  "CreatedOn": {
+    "date": "2020-11-17 08:33:34.723000",
+    "timezone_type": 3,
+    "timezone": "Europe\/Berlin"
+  },
+  "ModifiedBy": "f.koechl@sofa1.at",
+  "ModifiedOn": {
+    "date": "2020-11-17 08:33:34.723000",
+    "timezone_type": 3,
+    "timezone": "Europe\/Berlin"
+  }
+}
