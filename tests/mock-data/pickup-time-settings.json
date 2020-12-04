@@ -1,0 +1,96 @@
+{
+  "TimeSettingPeriods": [
+    {
+      "TimeSettingPeriodDays": [
+        {
+          "TimeSettingPeriodId": "49",
+          "Day": "1",
+          "FromTime": {
+            "date": "2020-11-17 13:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          },
+          "ToTime": {
+            "date": "2020-11-17 21:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          }
+        },
+        {
+          "TimeSettingPeriodId": "49",
+          "Day": "2",
+          "FromTime": {
+            "date": "2020-11-17 15:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          },
+          "ToTime": {
+            "date": "2020-11-17 21:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          }
+        },
+        {
+          "TimeSettingPeriodId": "49",
+          "Day": "5",
+          "FromTime": {
+            "date": "2020-11-17 10:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          },
+          "ToTime": {
+            "date": "2020-11-17 22:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          }
+        },
+        {
+          "TimeSettingPeriodId": "49",
+          "Day": "6",
+          "FromTime": {
+            "date": "2020-11-17 10:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          },
+          "ToTime": {
+            "date": "2020-11-17 22:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          }
+        },
+        {
+          "TimeSettingPeriodId": "49",
+          "Day": "0",
+          "FromTime": {
+            "date": "2020-11-17 10:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          },
+          "ToTime": {
+            "date": "2020-11-17 21:00:00.000000",
+            "timezone_type": 3,
+            "timezone": "Europe\/Berlin"
+          }
+        }
+      ],
+      "Id": "49",
+      "TimeSettingId": "a01b6b42-54c5-4842-b688-085590a9a5b3",
+      "FromDate": {
+        "date": "2020-01-01 00:00:00.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Berlin"
+      },
+      "ToDate": {
+        "date": "2020-12-31 00:00:00.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Berlin"
+      }
+    }
+  ],
+  "TimeSettingPeriodsHeader": "\u003Cp class='pb-0 mb-0 mt-1'\u003E\u003Cstrong\u003E\u003Cspan class='time-settings-from'\u003E01.01\u003C\/span\u003E - \u003Cspan class='time-settings-to'\u003E31.12\u003C\/span\u003E \u003C\/strong\u003E\u003C\/p\u003E",
+  "businessHours": {},
+  "Id": "a01b6b42-54c5-4842-b688-085590a9a5b3",
+  "StationId": 157,
+  "Name": "Jahres Abholzeiten",
+  "Description": null
+}

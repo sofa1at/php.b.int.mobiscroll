@@ -213,9 +213,14 @@ class Sofa1MobiscrollConverter
             $date = clone $this->startDate;
             for ($i = 0; $i <= $this->max; $i++) {
                 foreach ($timeSetting->TimeSettingPeriods as $timeSettingPeriod) {
-                    $fromDate = $timeSettingPeriod->FromDate->format("md");
-                    $toDate = $timeSettingPeriod->ToDate->format("md");
-                    if ($date->format("md") < $fromDate || $date->format("md") > $toDate) {
+                    if ($timeSettingPeriod->TimeSettingId) {
+                        $dateFormat = 'md';
+                    } else {
+                        $dateFormat = 'Ymd';
+                    }
+                    $fromDate = $timeSettingPeriod->FromDate->format($dateFormat);
+                    $toDate = $timeSettingPeriod->ToDate->format($dateFormat);
+                    if ($date->format($dateFormat) < $fromDate || $date->format($dateFormat) > $toDate) {
                         continue;
                     }
 
@@ -303,8 +308,8 @@ class Sofa1MobiscrollConverter
     public function GetLabels()
     {
         $returnValue = array();
-        if(!empty($this->labels)){
-            foreach ($this->labels as $label){
+        if (!empty($this->labels)) {
+            foreach ($this->labels as $label) {
                 $returnValue[] = (string)$label;
             }
         }

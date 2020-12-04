@@ -16,3 +16,21 @@ $converter->AddTimeSetting($mockTimeSetting);
 // receive json
 $converter->ToString();
 ````
+
+#phpunit tests
+Test if the output strings ar equal to the mock data strings.
+
+Folder tests
+
+TestClass InterpreterTest (interpretertest.php)
+
+````php
+// timeSettings with Holidays 
+testTimeSettingsAndBusinessHolidays();
+// timeSettings only
+testTimeSettings();
+// businessHours only
+testBusinessHours();
+// businessHours with Holidays
+testBusinessHoursAndBusinessHolidays();
+````
