@@ -1,0 +1,82 @@
+[
+  {
+    "StationId": 157,
+    "Day": "Monday",
+    "From": "08:00",
+    "To": "13:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Monday",
+    "From": "15:30",
+    "To": "21:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Tuesday",
+    "From": "08:00",
+    "To": "13:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Tuesday",
+    "From": "15:30",
+    "To": "21:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Wednesday",
+    "From": "00:00",
+    "To": "23:59",
+    "IsOpen": false,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Thursday",
+    "From": "00:00",
+    "To": "23:59",
+    "IsOpen": false,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Friday",
+    "From": "09:00",
+    "To": "13:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Friday",
+    "From": "15:30",
+    "To": "22:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Saturday",
+    "From": "09:00",
+    "To": "22:00",
+    "IsOpen": true,
+    "InfoText": null
+  },
+  {
+    "StationId": 157,
+    "Day": "Sunday",
+    "From": "09:00",
+    "To": "21:00",
+    "IsOpen": true,
+    "InfoText": null
+  }
+]
