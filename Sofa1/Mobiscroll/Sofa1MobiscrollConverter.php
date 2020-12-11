@@ -54,6 +54,11 @@ class Sofa1MobiscrollConverter
      */
     private $mapper;
 
+    /**
+     * @var null|int
+     */
+    private $reservationDuration = null;
+
     public function __construct($max = 365, $startDate = null)
     {
         $this->mapper = new \JsonMapper();
@@ -188,6 +193,14 @@ class Sofa1MobiscrollConverter
     }
 
     /**
+     * @param $minutes int
+     * Set the duration in minutes that will be removed from TimeSetting and OpenHour end times
+     */
+    public function SetReservationDuration($minutes) {
+        $this->reservationDuration = $minutes;
+    }
+
+    /**
      * @return string
      * @throws Exception
      */
@@ -224,15 +237,27 @@ class Sofa1MobiscrollConverter
                         continue;
                     }
 
+                    if (is_null($timeSettingPeriod->Id) && $this->IsInTimeSettingPeriodRange($date)) {
+                       continue;
+                    }
+
                     if (!empty($timeSettingPeriod->TimeSettingPeriodDays)) {
                         foreach ($timeSettingPeriod->TimeSettingPeriodDays as $periodDay) {
                             $dayofweek = $date->format('l');
-                            if ((is_null($periodDay->Day) ? true : $periodDay->Day == DateTimeHelper::GetWeekdayNumberFromString($dayofweek, 'sunday'))) {
+                            $weekdayNumber = DateTimeHelper::GetWeekdayNumberFromString($dayofweek, 'sunday');
+                            // If day equals date or is general and there is no specific day for weekday
+                            if ($periodDay->Day == $weekdayNumber || (is_null($periodDay->Day) && $timeSettingPeriod->ContainsSpecificDay($periodDay->Day))) {
                                 $periodDate = clone $date;
                                 $from = is_a($periodDay->FromTime, "\DateTime") ? $periodDay->FromTime->format("H:i") : $periodDay->FromTime;
                                 $to = is_a($periodDay->ToTime, "\DateTime") ? $periodDay->ToTime->format("H:i") : $periodDay->ToTime;
+                                if(isset($this->reservationDuration)) {
+                                    $duration = $this->reservationDuration;
+                                    $to = date('H:i', strtotime("$to -$duration minutes"));
+                                }
 
-                                $this->TryAddValidDateTimeRange($periodDate, $from, $to);
+                                if($to >= $from) {
+                                    $this->TryAddValidDateTimeRange($periodDate, $from, $to);
+                                }
                             }
                         }
                     } else {
@@ -303,6 +328,28 @@ class Sofa1MobiscrollConverter
 
         // no match
         return [];
+    }
+
+    /**
+     * @param $date DateTime
+     * @return boolean
+     * Checks if date is inside a TimeSetting Period, does not check OpenHours
+     */
+    private function IsInTimeSettingPeriodRange($date) {
+        foreach ($this->timeSettings as $timeSetting) {
+            if(is_null($timeSetting->Id)) {
+                continue;
+            }
+            foreach ($timeSetting->TimeSettingPeriods as $period) {
+                $fromDate = $period->FromDate->format("md");
+                $toDate = $period->ToDate->format("md");
+                if ($date->format("md") > $fromDate && $date->format("md") < $toDate)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public function GetLabels()

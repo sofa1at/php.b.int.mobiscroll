@@ -1,6 +1,5 @@
 <?php
 
-require_once 'invalid-mock-data.php';
 require_once 'valid-mock-data.php';
 
 use PHPUnit\Framework\TestCase;
