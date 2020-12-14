@@ -66,6 +66,8 @@ class Sofa1MobiscrollConverter
         $this->max = $max;
         if ($startDate == null) {
             $this->startDate = new DateTime('now', new \DateTimeZone('UTC'));
+        } else {
+            $this->startDate = $startDate;
         }
     }
 
