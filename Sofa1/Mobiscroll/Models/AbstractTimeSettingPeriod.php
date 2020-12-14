@@ -30,4 +30,19 @@ class AbstractTimeSettingPeriod
 	 * @var AbstractTimeSettingPeriodDay[]
 	 */
 	public $TimeSettingPeriodDays;
+
+    /**
+     * @param $weekday string Name of weekday
+     * @return boolean
+     *
+     * Checks if the period has a day record for a specific weekday
+     */
+    public function ContainsSpecificDay($weekday) {
+        foreach ($this->TimeSettingPeriodDays as $day) {
+            if ($day->Day == $weekday) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
