@@ -1,6 +1,5 @@
 <?php
 
-require_once 'invalid-mock-data.php';
 require_once 'valid-mock-data.php';
 
 use PHPUnit\Framework\TestCase;
@@ -10,7 +9,7 @@ final class InterpreterTest extends TestCase
 {
     public function testTimeSettingsAndBusinessHolidays()
     {
-        $mobiHelper = new Sofa1MobiscrollConverter();
+        $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
         $businessHoliday = $mock->businessHolidays();
         $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
@@ -24,7 +23,7 @@ final class InterpreterTest extends TestCase
 
     public function testTimeSettings()
     {
-        $mobiHelper = new Sofa1MobiscrollConverter();
+        $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
         $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
 
@@ -36,7 +35,7 @@ final class InterpreterTest extends TestCase
 
     public function testBusinessHours()
     {
-        $mobiHelper = new Sofa1MobiscrollConverter();
+        $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
         $mobiHelper->AddBusinessHours($mock->businessHours());
 
@@ -48,7 +47,7 @@ final class InterpreterTest extends TestCase
 
     public function testBusinessHoursAndBusinessHolidays()
     {
-        $mobiHelper = new Sofa1MobiscrollConverter();
+        $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
         $mobiHelper->AddBusinessHours($mock->businessHours());
         $businessHoliday = $mock->businessHolidays();
