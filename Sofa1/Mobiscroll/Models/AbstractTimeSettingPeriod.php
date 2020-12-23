@@ -27,7 +27,7 @@ class AbstractTimeSettingPeriod
 	public $ToDate;
 
 	/**
-	 * @var AbstractTimeSettingPeriodDay[]
+	 * @var \Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriodDay[]
 	 */
 	public $TimeSettingPeriodDays;
 
