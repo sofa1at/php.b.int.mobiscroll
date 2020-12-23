@@ -4,8 +4,6 @@
 namespace Sofa1\Mobiscroll\Models;
 
 
-use App\Core\Helpers\LocalizedDateTimeHelper;
-use DateTime;
 use Sofa1\Mobiscroll\Helpers\DateTimeHelper;
 
 class AbstractTimeSetting
@@ -31,12 +29,12 @@ class AbstractTimeSetting
     public $Description;
 
     /**
-     * @var AbstractTimeSettingPeriod[]|null
+     * @var \Sofa1\Mobiscroll\Models\AbstractTimeSettingPeriod[]|null
      */
     public $TimeSettingPeriods;
 
     /**
-     * @param $date DateTime
+     * @param $date \DateTime
      *
      * @return bool
      */
