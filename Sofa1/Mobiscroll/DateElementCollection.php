@@ -48,4 +48,12 @@ class DateElementCollection
 
 		return implode(",", $returnValues);
 	}
+
+    /**
+     * @return AbstractDateElement[]
+     */
+    public function GetItems(): array
+    {
+        return $this->Items;
+    }
 }

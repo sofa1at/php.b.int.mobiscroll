@@ -214,6 +214,30 @@ class Sofa1MobiscrollConverter
         return $this->validation->ToString();
     }
 
+    /**
+     * @return Models\AbstractDateElement[]
+     */
+    public function GetValidTimeSettings() {
+        if (empty($this->validation))
+        {
+            $this->validation = new DateTimeValidation();
+            $this->ValidateTimeSettings();
+        }
+        return $this->validation->Valid->GetItems();
+    }
+
+    /**
+     * @return Models\AbstractDateElement[]
+     */
+    public function GetInvalidTimeSettings() {
+        if (empty($this->validation))
+        {
+            $this->validation = new DateTimeValidation();
+            $this->ValidateTimeSettings();
+        }
+        return $this->validation->Invalid->GetItems();
+    }
+
     private function ValidateTimeSettings()
     {
         if (empty($this->timeSettings)) {
