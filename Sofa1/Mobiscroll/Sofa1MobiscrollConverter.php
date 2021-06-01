@@ -369,7 +369,7 @@ class Sofa1MobiscrollConverter
             foreach ($timeSetting->TimeSettingPeriods as $period) {
                 $fromDate = $period->FromDate->format("md");
                 $toDate = $period->ToDate->format("md");
-                if ($date->format("md") > $fromDate && $date->format("md") < $toDate)
+                if ($date->format("md") >= $fromDate && $date->format("md") <= $toDate)
                 {
                     return true;
                 }
