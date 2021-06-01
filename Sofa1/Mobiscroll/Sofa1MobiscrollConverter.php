@@ -215,6 +215,7 @@ class Sofa1MobiscrollConverter
     }
 
     /**
+     * Returns an array with all valid days
      * @return Models\AbstractDateElement[]
      */
     public function GetValidTimeSettings() {
@@ -227,6 +228,7 @@ class Sofa1MobiscrollConverter
     }
 
     /**
+     * Returns an array with all invalid days
      * @return Models\AbstractDateElement[]
      */
     public function GetInvalidTimeSettings() {
