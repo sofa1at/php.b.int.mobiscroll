@@ -214,6 +214,32 @@ class Sofa1MobiscrollConverter
         return $this->validation->ToString();
     }
 
+    /**
+     * Returns an array with all valid days
+     * @return Models\AbstractDateElement[]
+     */
+    public function GetValidTimeSettings() {
+        if (empty($this->validation))
+        {
+            $this->validation = new DateTimeValidation();
+            $this->ValidateTimeSettings();
+        }
+        return $this->validation->Valid->GetItems();
+    }
+
+    /**
+     * Returns an array with all invalid days
+     * @return Models\AbstractDateElement[]
+     */
+    public function GetInvalidTimeSettings() {
+        if (empty($this->validation))
+        {
+            $this->validation = new DateTimeValidation();
+            $this->ValidateTimeSettings();
+        }
+        return $this->validation->Invalid->GetItems();
+    }
+
     private function ValidateTimeSettings()
     {
         if (empty($this->timeSettings)) {
@@ -345,7 +371,7 @@ class Sofa1MobiscrollConverter
             foreach ($timeSetting->TimeSettingPeriods as $period) {
                 $fromDate = $period->FromDate->format("md");
                 $toDate = $period->ToDate->format("md");
-                if ($date->format("md") > $fromDate && $date->format("md") < $toDate)
+                if ($date->format("md") >= $fromDate && $date->format("md") <= $toDate)
                 {
                     return true;
                 }

@@ -12,4 +12,9 @@ abstract class AbstractDateElement
 	 * @var string
 	 */
 	public $method;
+
+    /**
+     * @var \DateTime
+     */
+    public $date;
 }
