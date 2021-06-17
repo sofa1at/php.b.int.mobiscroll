@@ -13,6 +13,17 @@
   "require": {
     "netresearch/jsonmapper": "^3"
   },
+  "config": {
+    "github-oauth": {
+      "github.com": "9c8385025c988eab2d47cace7f5f1dce543d75b2"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:SOFA-1/php.core.git"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Sofa1\\Mobiscroll\\": "Sofa1/Mobiscroll/",
@@ -22,6 +33,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9",
-    "ext-json": "*"
+    "ext-json": "*",
+    "sofa1at/php.b.core": "1.4.0"
   }
 }

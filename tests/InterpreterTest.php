@@ -58,30 +58,4 @@ final class InterpreterTest extends TestCase
             $mobiHelper->ToString()
         );
     }
-
-    public function testValidTimeSettings() {
-        $mobiHelper = new Sofa1MobiscrollConverter(7, new DateTime('2020-11-17'));
-        $mock = new ValidMockData();
-        $mobiHelper->AddBusinessHours($mock->businessHours());
-        $businessHoliday = $mock->businessHolidays();
-        $mobiHelper->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
-        $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
-        $this->assertEquals(
-            $mock->resultStringValidTimeSettings(),
-            json_encode($mobiHelper->GetValidTimeSettings())
-        );
-    }
-
-    public function testInvalidTimeSettings() {
-        $mobiHelper = new Sofa1MobiscrollConverter(7, new DateTime('2020-11-17'));
-        $mock = new ValidMockData();
-        $mobiHelper->AddBusinessHours($mock->businessHours());
-        $businessHoliday = $mock->businessHolidays();
-        $mobiHelper->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
-        $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
-        $this->assertEquals(
-            $mock->resultStringInvalidTimeSettings(),
-            json_encode($mobiHelper->GetInvalidTimeSettings())
-        );
-    }
 }
