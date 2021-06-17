@@ -11,17 +11,18 @@
   ],
   "homepage": "https://github.com/sofa1at/php-mobiscrollinterpreter",
   "require": {
-    "netresearch/jsonmapper": "^3"
+    "netresearch/jsonmapper": "^3",
+    "sofa1at/php.b.core": "1.4.2"
   },
   "config": {
     "github-oauth": {
-      "github.com": "9c8385025c988eab2d47cace7f5f1dce543d75b2"
+      "github.com": "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"
     }
   },
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:SOFA-1/php.core.git"
+      "url": "git@github.com:sofa1at/php.b.core.git"
     }
   ],
   "autoload": {
@@ -33,7 +34,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9",
-    "ext-json": "*",
-    "sofa1at/php.b.core": "1.4.0"
+    "ext-json": "*"
   }
 }
