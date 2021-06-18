@@ -13,7 +13,7 @@
   "homepage": "https://github.com/sofa1at/php.b.int.mobiscroll",
   "config": {
     "github-oauth": {
-      "github.com": "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"
+		"github.com": "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"
     }
   },
   "require": {
