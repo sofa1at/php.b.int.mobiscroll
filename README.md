@@ -6,7 +6,7 @@
   },
   "config": {
     "github-oauth": {
-      "github.com": "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"
+      "github.com": "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"
     }
   },
   "repositories": [
