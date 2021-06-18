@@ -12,7 +12,7 @@
   "homepage": "https://github.com/sofa1at/php-mobiscrollinterpreter",
   "require": {
     "netresearch/jsonmapper": "^3",
-    "sofa1at/php.b.core": "1.4.2"
+    "sofa1at/php.b.core": "1.4.3"
   },
   "config": {
     "github-oauth": {
