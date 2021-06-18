@@ -2,17 +2,16 @@
 
 require_once 'valid-mock-data.php';
 
-use PHPUnit\Framework\TestCase;
 use Sofa1\Mobiscroll\Sofa1MobiscrollConverter;
 
-final class InterpreterTest extends TestCase
+final class InterpreterTest extends PHPUnit\Framework\TestCase
 {
     public function testTimeSettingsAndBusinessHolidays()
     {
         $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
-        $businessHoliday = $mock->businessHolidays();
-        $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
+        $businessHoliday = $mock->BusinessHolidays();
+        $mobiHelper->AddTimeSettings($mock->PickupTimeSettings());
         $mobiHelper->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
 
         $this->assertEquals(
@@ -25,7 +24,7 @@ final class InterpreterTest extends TestCase
     {
         $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
-        $mobiHelper->AddTimeSettings($mock->pickupTimeSettings());
+        $mobiHelper->AddTimeSettings($mock->PickupTimeSettings());
 
         $this->assertEquals(
             $mock->resultStringTimeSettings(),
@@ -37,7 +36,7 @@ final class InterpreterTest extends TestCase
     {
         $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
-        $mobiHelper->AddBusinessHours($mock->businessHours());
+        $mobiHelper->AddBusinessHours($mock->BusinessHours());
 
         $this->assertEquals(
             $mock->resultStringBusinessHours(),
@@ -49,13 +48,25 @@ final class InterpreterTest extends TestCase
     {
         $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
         $mock = new ValidMockData();
-        $mobiHelper->AddBusinessHours($mock->businessHours());
-        $businessHoliday = $mock->businessHolidays();
+        $mobiHelper->AddBusinessHours($mock->BusinessHours());
+        $businessHoliday = $mock->BusinessHolidays();
         $mobiHelper->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
 
         $this->assertEquals(
             $mock->resultStringBusinessHoursAndBusinessHolidays(),
             $mobiHelper->ToString()
         );
+    }
+
+    public function testGetLabels() {
+	    $mobiHelper = new Sofa1MobiscrollConverter(365, new DateTime('2020-11-17'));
+	    $mock = new ValidMockData();
+	    $businessHoliday = $mock->BusinessHolidays();
+	    $mobiHelper->AddBusinessHolidays($businessHoliday->From, $businessHoliday->To, $businessHoliday->InfoText);
+
+	    $this->assertEquals(
+	    	"{start: new Date(2020,10,16), end: new Date(2020,10,19), text: 'Urlaub'}",
+		    $mobiHelper->GetLabels()
+	    );
     }
 }

@@ -1,3 +1,23 @@
+## install the mobiscroll via composer
+```json
+{
+  "require": {
+    "sofa1at/php.b.int.mobiscroll": "^1"
+  },
+  "config": {
+    "github-oauth": {
+      "github.com": "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"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:sofa1at/php.b.int.mobiscroll.git"
+    }
+  ]
+}
+```
+
 # php-mobiscrollinterpreter
 
 This repository holds all interfaces/classes/traits related to PSR-3.
