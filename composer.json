@@ -11,11 +11,6 @@
     }
   ],
   "homepage": "https://github.com/sofa1at/php.b.int.mobiscroll",
-  "config": {
-    "github-oauth": {
-		"github.com": "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"
-    }
-  },
   "require": {
     "netresearch/jsonmapper": "^3",
     "sofa1at/php.b.core": "1.4.3"
