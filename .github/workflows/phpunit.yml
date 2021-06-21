@@ -11,7 +11,7 @@ jobs:
 
       - uses: php-actions/composer@v5
         with:
-          ssh_key: ${{ secret.GIT_TOKEN }}
+          ssh_key: ${{ secrets.GIT_TOKEN }}
 
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
