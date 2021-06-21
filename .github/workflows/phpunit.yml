@@ -11,7 +11,7 @@ jobs:
 
       - uses: php-actions/composer@v5
         with:
-          command: composer config --auth github-oauth.github.com ${{secret.GIT_TOKEN}}
+          command: composer config --auth github-oauth.github.com ${{ secret.GIT_TOKEN }}
 
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
