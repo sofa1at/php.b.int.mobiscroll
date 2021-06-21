@@ -12,7 +12,7 @@ jobs:
       - uses: php-actions/composer@v5
         with:
         #  ssh_key: ${{ secrets.GIT_TOKEN }}
-          ssh_key: AAAAC3NzaC1lZDI1NTE5AAAAIPjc7i84xZyYoLGuk
+          command: composer config --auth github-oauth.github.com ${{ secrets.GIT_TOKEN }}
 
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
