@@ -9,7 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: php-actions/composer@v5
+      - name: Install dependencies
+        uses: php-actions/composer@v5
         with:
         #  ssh_key: ${{ secrets.GIT_TOKEN }} 
           ssh_key: eFMA5F6a5Rv1Adf+HxTH9PiYPO
