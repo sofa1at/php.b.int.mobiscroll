@@ -12,8 +12,10 @@ jobs:
       - name: Install dependencies
         uses: php-actions/composer@v5
         with:
-          ssh_key: ${{ secrets.SSH_KEY }}
-          ssh_key_pub: ${{ secrets.SSH_KEY_PUBLIC }}
+          #ssh_key: ${{ secrets.SSH_KEY }}
+          #ssh_key_pub: ${{ secrets.SSH_KEY_PUBLIC }}
+          command: composer
+          args: config -g github-oauth.github.com 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
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
         with:
