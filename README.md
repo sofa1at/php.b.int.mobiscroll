@@ -1,3 +1,6 @@
+## status
+![Unittest](https://github.com/sofa1at/php.b.int.mobiscroll/actions/workflows/phpunit.yml/badge.svg)
+
 ## install the mobiscroll via composer
 ```json
 {
