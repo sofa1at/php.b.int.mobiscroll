@@ -18,3 +18,38 @@ type in the commandline
 ```shell
 phpunit
 ```
+
+# Run unittests on commit with private repos
+
+Demo yml
+
+```yml
+name: CI
+
+on: [push]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        env:
+          COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.COMPOSER_AUTH }}"} }'
+        run: |
+          composer update --prefer-dist --no-interaction --no-suggest
+      - name: PHPUnit Tests
+        uses: php-actions/phpunit@v2
+        with:
+          bootstrap: vendor/autoload.php
+          configuration: tests/phpunit.xml
+          args: --coverage-text
+```
+
+Create with your repository main user a personal access token.
+
+Go in your repository settings and ad the token as a new secret with the name COMPOSER_AUTH.
+
+Save the changes and make a commit.

@@ -7,7 +7,7 @@ use Exception;
 
 class Sofa1MobiscrollConverter extends \Sofa1\Core\StationDateTimeService\StationDateTimeService
 {
-	/** @var StringConverterService */
+	/** @var MobiscrollStringConverterService */
 	private $_stringConverter;
 	/**
 	 * Sofa1MobiscrollConverter constructor.
@@ -20,7 +20,7 @@ class Sofa1MobiscrollConverter extends \Sofa1\Core\StationDateTimeService\Statio
 	public function __construct($max = 365, $startDate = null)
 	{
 		parent::__construct($max, $startDate);
-		$this->_stringConverter = new  StringConverterService();
+		$this->_stringConverter = new  MobiscrollStringConverterService();
 	}
 
 	/**
