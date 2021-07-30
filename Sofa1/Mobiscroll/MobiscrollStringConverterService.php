@@ -6,7 +6,7 @@ namespace Sofa1\Mobiscroll;
 
 use Exception;
 
-class StringConverterService
+class MobiscrollStringConverterService
 {
 	/**
 	 * @param \Sofa1\Core\StationDateTimeService\Helpers\StationDateElementCollection $stationDateElementCollectionInvalid

@@ -1,3 +1,6 @@
+## status
+![Unittest](https://github.com/sofa1at/php.b.int.mobiscroll/actions/workflows/phpunit.yml/badge.svg)
+
 ## install the mobiscroll via composer
 ```json
 {
@@ -6,7 +9,7 @@
   },
   "config": {
     "github-oauth": {
-      "github.com": "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"
+      "github.com": "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"
     }
   },
   "repositories": [
