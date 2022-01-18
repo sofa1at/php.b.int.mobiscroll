@@ -24,16 +24,15 @@ class Sofa1MobiscrollConverter extends \Sofa1\Core\StationDateTimeService\Statio
 	}
 
 	/**
-//     * @return string
-     * @throws Exception
-     */
-    public function ToString()
-    {
-        $this->validation = new \Sofa1\Core\StationDateTimeService\Helpers\StationDateTimeValidation();
-        $this->ValidateTimeSettings();
-
-        return $this->_stringConverter->DateTimeValidationToString($this->validation->Invalid, $this->validation->Valid);
-    }
+	//     * @return string
+	 * @throws Exception
+	 */
+	public function ToString()
+	{
+		$this->validation = new \Sofa1\Core\StationDateTimeService\Helpers\StationDateTimeValidation();
+		$this->ValidateTimeSettings();
+		return $this->_stringConverter->DateTimeValidationToString($this->validation->Invalid, $this->validation->Valid);
+	}
 
 	/**
 	 * Converts this labels to an string
