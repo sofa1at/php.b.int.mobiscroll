@@ -40,6 +40,7 @@
       <path value="$PROJECT_DIR$/vendor/sofa1at/php.b.core" />
       <path value="$PROJECT_DIR$/vendor/netresearch/jsonmapper" />
       <path value="$PROJECT_DIR$/vendor/predis/predis" />
+      <path value="$PROJECT_DIR$/vendor/scssphp/scssphp" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.0">
