@@ -7,30 +7,40 @@ use Exception;
 
 class Sofa1MobiscrollConverter extends \Sofa1\Core\StationDateTimeService\StationDateTimeService
 {
-	/** @var MobiscrollStringConverterService */
-	private $_stringConverter;
+	/** @var IMobiscrollStringConverterService */
+	private IMobiscrollStringConverterService $_stringConverter;
+
 	/**
 	 * Sofa1MobiscrollConverter constructor.
 	 *
 	 * @param int $max
 	 * @param null $startDate
+	 * @param MobiscrollStringConverterService|null $converter
 	 *
 	 * @throws Exception
 	 */
-	public function __construct($max = 365, $startDate = null)
+	public function __construct($max = 365, $startDate = null, IMobiscrollStringConverterService $converter = null)
 	{
 		parent::__construct($max, $startDate);
-		$this->_stringConverter = new  MobiscrollStringConverterService();
+		if ($converter == null)
+		{
+			$this->_stringConverter = new  MobiscrollStringConverterService();
+		}
+		else
+		{
+			$this->_stringConverter = $converter;
+		}
 	}
 
 	/**
-	//     * @return string
+	 * //     * @return string
 	 * @throws Exception
 	 */
 	public function ToString()
 	{
 		$this->validation = new \Sofa1\Core\StationDateTimeService\Helpers\StationDateTimeValidation();
 		$this->ValidateTimeSettings();
+
 		return $this->_stringConverter->DateTimeValidationToString($this->validation->Invalid, $this->validation->Valid);
 	}
 

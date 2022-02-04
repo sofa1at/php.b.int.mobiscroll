@@ -5,8 +5,10 @@ namespace Sofa1\Mobiscroll;
 
 
 use Exception;
+use Sofa1\Core\StationDateTimeService\Elements\DateLabelElementModel;
+use Sofa1\Core\StationDateTimeService\Helpers\StationDateElementCollection;
 
-class MobiscrollStringConverterService
+class MobiscrollStringConverterService implements IMobiscrollStringConverterService
 {
 	/**
 	 * @param \Sofa1\Core\StationDateTimeService\Helpers\StationDateElementCollection $stationDateElementCollectionInvalid
@@ -15,7 +17,7 @@ class MobiscrollStringConverterService
 	 * @return string
 	 * @throws Exception
 	 */
-	public function DateTimeValidationToString($stationDateElementCollectionInvalid, $stationDateElementCollectionValid)
+	public function DateTimeValidationToString(StationDateElementCollection $stationDateElementCollectionInvalid, StationDateElementCollection $stationDateElementCollectionValid): string
 	{
 		return sprintf("invalid: [%s], valid: [%s]", $this->DateElementCollectionToString($stationDateElementCollectionInvalid), $this->DateElementCollectionToString($stationDateElementCollectionValid));
 	}
@@ -32,7 +34,8 @@ class MobiscrollStringConverterService
 		foreach ($stationDateElementCollection->Items as $item)
 		{
 			$itemClass = get_class($item);
-			switch ($itemClass) {
+			switch ($itemClass)
+			{
 				case 'Sofa1\Core\StationDateTimeService\Elements\DateElementModel' :
 					$returnValues[] = $this->DateElementToString($item);
 					break;
@@ -130,17 +133,18 @@ class MobiscrollStringConverterService
 
 	/**
 	 * @param \Sofa1\Core\StationDateTimeService\Elements\DateLabelElementModel $lable
+	 *
 	 * @return string
 	 */
-	public function DateLabelElementToString($lable)
+	public function DateLabelElementToString(DateLabelElementModel $label): string
 	{
 		return sprintf("{start: new Date(%s,%s,%s), end: new Date(%s,%s,%s), text: '%s'}",
-			$lable->from->format("Y"),
-			$lable->from->format("m") - 1,
-			$lable->from->format("d"),
-			$lable->to->format("Y"),
-			$lable->to->format("m") - 1,
-			$lable->to->format("d"),
-			$lable->infoText);
+			$label->from->format("Y"),
+			$label->from->format("m") - 1,
+			$label->from->format("d"),
+			$label->to->format("Y"),
+			$label->to->format("m") - 1,
+			$label->to->format("d"),
+			$label->infoText);
 	}
 }
