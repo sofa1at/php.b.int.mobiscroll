@@ -12,6 +12,7 @@ use Sofa1\Core\Api\Model\DateTime\TimeSettingPeriodDayModel;
 use Sofa1\Core\Api\Model\DateTime\TimeSettingPeriodModel;
 use Sofa1\Core\StationDateTimeService\Elements\DateTimeRangeElementModel;
 use Sofa1\Core\StationDateTimeService\Models\TimeSettingModel;
+use Sofa1\Core\Utilities\WeekDayUtilities;
 
 class Mobiscroll5Service
 {
@@ -22,6 +23,10 @@ class Mobiscroll5Service
 	/** @var DateTimeRangeElementModel[] */
 	protected $businessHolidays;
 
+	/** @var MobiscrollBusinessHours[] */
+	protected $invalidObjects;
+
+
 	/**
 	 * Checks the given businessHours and creates timeSettingsPeriods
 	 *
@@ -31,16 +36,19 @@ class Mobiscroll5Service
 	 */
 	public function AddBusinessHours(array $businessHours): void
 	{
-		$timeSettingPeriod = new TimeSettingPeriodModel();
-		foreach ($businessHours as $businessHour)
-		{
-			$timeSettingPeriodDay = new TimeSettingPeriodDayModel();
-			$timeSettingPeriodDay->Day = $businessHour->Day;
-			$timeSettingPeriodDay->FromTime = $businessHour->From;
-			$timeSettingPeriodDay->ToTime = $businessHour->To;
-			$timeSettingPeriod->TimeSettingPeriodDays[] = $timeSettingPeriodDay;
-		}
-		$this->businessHours = $timeSettingPeriod;
+		$invalidObject = new MobiscrollBusinessHours();
+		$invalidObject->AddBusinessHours($businessHours);
+		$this->invalidObjects[] = $invalidObject;
+//		$timeSettingPeriod = new TimeSettingPeriodModel();
+//		foreach ($businessHours as $businessHour)
+//		{
+//			$timeSettingPeriodDay = new TimeSettingPeriodDayModel();
+//			$timeSettingPeriodDay->Day = WeekDayUtilities::GetWeekdayNumberFromString($businessHour->Day, "Monday") + 1;
+//			$timeSettingPeriodDay->FromTime = $businessHour->From;
+//			$timeSettingPeriodDay->ToTime = $businessHour->To;
+//			$timeSettingPeriod->TimeSettingPeriodDays[] = $timeSettingPeriodDay;
+//		}
+//		$this->businessHours = $timeSettingPeriod;
 	}
 
 	/**
@@ -50,13 +58,19 @@ class Mobiscroll5Service
 	 */
 	public function AddTimeSettings(TimeSettingModel $timeSettings): void
 	{
-		if (empty($this->timeSettingPeriods))
-		{
-			$this->timeSettingPeriods = $timeSettings->TimeSettingPeriods;
-
-			return;
+		foreach ($timeSettings->TimeSettingPeriods as $timeSettingPeriod){
+			$invalidObject = new MobiscrollBusinessHours();
+			$invalidObject->AddTimeSettingPeriod($timeSettingPeriod, true);
+			$this->invalidObjects[] = $invalidObject;
 		}
-		$this->timeSettingPeriods = array_merge($this->timeSettingPeriods, $timeSettings->TimeSettingPeriods);
+
+//		if (empty($this->timeSettingPeriods))
+//		{
+//			$this->timeSettingPeriods = $timeSettings->TimeSettingPeriods;
+//
+//			return;
+//		}
+//		$this->timeSettingPeriods = array_merge($this->timeSettingPeriods, $timeSettings->TimeSettingPeriods);
 	}
 
 	/**
@@ -64,24 +78,28 @@ class Mobiscroll5Service
 	 */
 	public function AddBusinessHolidays(StationBusinessHolidayDto $businessHolidayDto): void
 	{
-		$this->businessHolidays[] = $businessHolidayDto;
+		$invalidObject = new MobiscrollBusinessHours();
+		$invalidObject->AddBusinessHoliday($businessHolidayDto);
+		$this->invalidObjects[] = $invalidObject;
+		//$this->businessHolidays[] = $businessHolidayDto;
 	}
 
 	/** @var MobiscrollBusinessHours[] $businessHours */
 	private array $tempTimeSettingPeriods;
 
-	public function Render()
+	public function Render(): string
 	{
-		$this->RendererAddTimeSettingPeriod(new MobiscrollBusinessHours($this->businessHours));
-		foreach ($this->timeSettingPeriods as $timeSettingPeriod)
-		{
-			$this->RendererAddTimeSettingPeriod(new MobiscrollBusinessHours($timeSettingPeriod));
+		$returnValue = "";
+
+		foreach ($this->invalidObjects as $invalidObject){
+			$this->RendererAddTimeSettingPeriod($invalidObject);
 		}
 
-		$returnValue = "";
-		foreach ($this->tempTimeSettingPeriods as $timeSettingPeriod){
-			$returnValue .= $timeSettingPeriod->Render();
+		foreach ($this->tempTimeSettingPeriods as $invalidObject){
+			$returnValue .= (empty($returnValue) ? "" : ",") . (string)$invalidObject;
 		}
+
+		return $returnValue;
 	}
 
 	/**
@@ -98,17 +116,23 @@ class Mobiscroll5Service
 
 		foreach ($this->tempTimeSettingPeriods as $existingTimeSettingPeriod)
 		{
-			$existingFromDate = empty($existingTimeSettingPeriod->FromDate) ? DateTime::createFromFormat("Y-m-d", "1970-01-01") : $existingTimeSettingPeriod->FromDate;
-			$existingToDate = empty($existingTimeSettingPeriod->ToDate) ? DateTime::createFromFormat("Y-m-d", "3000-01-01") : $existingTimeSettingPeriod->ToDate;
-			if ($existingFromDate <= $newTimeSettingPeriod->timeSettingPeriod->FromDate && $existingToDate >= $newTimeSettingPeriod->timeSettingPeriod->ToDate)
+			$existingFromDate = empty($existingTimeSettingPeriod->FromDate) ? DateTime::createFromFormat("Y-m-d", "1970-01-01") : clone $existingTimeSettingPeriod->FromDate;
+			$existingToDate = empty($existingTimeSettingPeriod->ToDate) ? DateTime::createFromFormat("Y-m-d", "3000-01-01") : clone $existingTimeSettingPeriod->ToDate;
+			if ($existingFromDate <= $newTimeSettingPeriod->FromDate && $existingToDate >= $newTimeSettingPeriod->ToDate)
 			{
-				// here comes an collision and we have to split
 				$preTimeSettingPeriod = clone $existingTimeSettingPeriod;
-				$preTimeSettingPeriod->timeSettingPeriod->ToDate = $newTimeSettingPeriod->timeSettingPeriod->FromDate;
+
+				// here comes an collision and we have to split
+				//$preTimeSettingPeriod = clone $existingTimeSettingPeriod;
+				$preTimeSettingPeriod->ToDate = clone $newTimeSettingPeriod->FromDate;
+				$preTimeSettingPeriod->ToDate->sub(new \DateInterval("P1D"));
 				$this->tempTimeSettingPeriods[] = $preTimeSettingPeriod;
 
-				$afterTimeSettingPeriod = $existingTimeSettingPeriod;
-				$afterTimeSettingPeriod->timeSettingPeriod->FromDate = $newTimeSettingPeriod->timeSettingPeriod->ToDate;
+				// set end of existing timesetting period
+				$existingTimeSettingPeriod->FromDate = clone $newTimeSettingPeriod->ToDate;
+				$existingTimeSettingPeriod->FromDate->add(new \DateInterval("P1D"));
+
+				// add the new one
 				$this->tempTimeSettingPeriods[] = $newTimeSettingPeriod;
 			}
 		}
