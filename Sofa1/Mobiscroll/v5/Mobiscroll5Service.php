@@ -8,27 +8,43 @@ use DateTime;
 use Exception;
 use Sofa1\Core\Api\Dto\DateTime\BusinessHoursDto;
 use Sofa1\Core\Api\Dto\DateTime\StationBusinessHolidayDto;
-use Sofa1\Core\Api\Model\DateTime\TimeSettingPeriodDayModel;
-use Sofa1\Core\Api\Model\DateTime\TimeSettingPeriodModel;
-use Sofa1\Core\StationDateTimeService\Elements\DateTimeRangeElementModel;
 use Sofa1\Core\StationDateTimeService\Models\TimeSettingModel;
 use Sofa1\Core\Utilities\WeekDayUtilities;
 
 class Mobiscroll5Service
 {
-	/** @var  TimeSettingPeriodModel */
-	protected $businessHours;
-	/** @var TimeSettingPeriodModel[] */
-	protected $timeSettingPeriods;
-	/** @var DateTimeRangeElementModel[] */
-	protected $businessHolidays;
-
-	/** @var MobiscrollBusinessHours[] */
-	protected $invalidObjects;
-
+	/**
+	 * The regular business hours
+	 * @var MobiscrollBusinessHours[]|null
+	 */
+	protected ?array $businessHours = null;
 
 	/**
-	 * Checks the given businessHours and creates timeSettingsPeriods
+	 * The business hours for pickup option
+	 * @var MobiscrollBusinessHours[]|null
+	 */
+	protected ?array $pickupBusinessHours = null;
+
+	/**
+	 * The business hours for delivery option
+	 * @var MobiscrollBusinessHours[]|null
+	 */
+	protected ?array $deliveryBusinessHours = null;
+
+	/**
+	 * The special opening times
+	 * @var MobiscrollBusinessHours[]|null
+	 */
+	protected ?array $timeSettings = null;
+
+	/**
+	 * The holidays
+	 * @var MobiscrollBusinessHours[]|null
+	 */
+	protected ?array $businessHolidays = null;
+
+	/**
+	 * Adds BusinessHours
 	 *
 	 * @param BusinessHoursDto[] $businessHours
 	 *
@@ -38,17 +54,39 @@ class Mobiscroll5Service
 	{
 		$invalidObject = new MobiscrollBusinessHours();
 		$invalidObject->AddBusinessHours($businessHours);
-		$this->invalidObjects[] = $invalidObject;
-//		$timeSettingPeriod = new TimeSettingPeriodModel();
-//		foreach ($businessHours as $businessHour)
-//		{
-//			$timeSettingPeriodDay = new TimeSettingPeriodDayModel();
-//			$timeSettingPeriodDay->Day = WeekDayUtilities::GetWeekdayNumberFromString($businessHour->Day, "Monday") + 1;
-//			$timeSettingPeriodDay->FromTime = $businessHour->From;
-//			$timeSettingPeriodDay->ToTime = $businessHour->To;
-//			$timeSettingPeriod->TimeSettingPeriodDays[] = $timeSettingPeriodDay;
-//		}
-//		$this->businessHours = $timeSettingPeriod;
+		$this->businessHours[] = $invalidObject;
+	}
+
+	/**
+	 * Adds BusinessHours for pickup
+	 *
+	 * @param TimeSettingModel $timeSettings
+	 *
+	 */
+	public function AddPickupBusinessHours(TimeSettingModel $timeSettings): void
+	{
+		foreach ($timeSettings->TimeSettingPeriods as $timeSettingPeriod)
+		{
+			$invalidObject = new MobiscrollBusinessHours();
+			$invalidObject->AddTimeSettingPeriod($timeSettingPeriod, true);
+			$this->pickupBusinessHours[] = $invalidObject;
+		}
+	}
+
+	/**
+	 * Adds BusinessHours for delivery
+	 *
+	 * @param TimeSettingModel $timeSettings
+	 *
+	 */
+	public function AddDeliveryBusinessHours(TimeSettingModel $timeSettings): void
+	{
+		foreach ($timeSettings->TimeSettingPeriods as $timeSettingPeriod)
+		{
+			$invalidObject = new MobiscrollBusinessHours();
+			$invalidObject->AddTimeSettingPeriod($timeSettingPeriod, true);
+			$this->deliveryBusinessHours[] = $invalidObject;
+		}
 	}
 
 	/**
@@ -56,21 +94,14 @@ class Mobiscroll5Service
 	 *
 	 * @param TimeSettingModel $timeSettings
 	 */
-	public function AddTimeSettings(TimeSettingModel $timeSettings): void
+	public function AddSpecialOpeningHours(TimeSettingModel $timeSettings): void
 	{
-		foreach ($timeSettings->TimeSettingPeriods as $timeSettingPeriod){
+		foreach ($timeSettings->TimeSettingPeriods as $timeSettingPeriod)
+		{
 			$invalidObject = new MobiscrollBusinessHours();
 			$invalidObject->AddTimeSettingPeriod($timeSettingPeriod, true);
-			$this->invalidObjects[] = $invalidObject;
+			$this->timeSettings[] = $invalidObject;
 		}
-
-//		if (empty($this->timeSettingPeriods))
-//		{
-//			$this->timeSettingPeriods = $timeSettings->TimeSettingPeriods;
-//
-//			return;
-//		}
-//		$this->timeSettingPeriods = array_merge($this->timeSettingPeriods, $timeSettings->TimeSettingPeriods);
 	}
 
 	/**
@@ -80,61 +111,172 @@ class Mobiscroll5Service
 	{
 		$invalidObject = new MobiscrollBusinessHours();
 		$invalidObject->AddBusinessHoliday($businessHolidayDto);
-		$this->invalidObjects[] = $invalidObject;
-		//$this->businessHolidays[] = $businessHolidayDto;
+		$this->businessHolidays[] = $invalidObject;
 	}
 
-	/** @var MobiscrollBusinessHours[] $businessHours */
-	private array $tempTimeSettingPeriods;
-
-	public function Render(): string
+	/**
+	 * Turns the regular business hours (+ special hours, + holidays) into invalid objects
+	 * @return string
+	 */
+	public function RenderBusinessHours(): string
 	{
 		$returnValue = "";
+		$bhs = array();
 
-		foreach ($this->invalidObjects as $invalidObject){
-			$this->RendererAddTimeSettingPeriod($invalidObject);
+		// regular business hours
+		foreach ($this->businessHours as $invalidObject)
+		{
+			$this->MergeBusinessHours($bhs, $invalidObject);
 		}
 
-		foreach ($this->tempTimeSettingPeriods as $invalidObject){
-			$returnValue .= (empty($returnValue) ? "" : ",") . (string)$invalidObject;
+		// add custom time settings
+		foreach ($this->timeSettings as $invalidObject)
+		{
+			$this->MergeBusinessHours($bhs, $invalidObject);
+		}
+
+		// add holidays
+		foreach ($this->businessHolidays as $invalidObject)
+		{
+			$this->MergeBusinessHours($bhs, $invalidObject);
+		}
+
+		// render the invalid objects
+		foreach ($bhs as $invalidObject)
+		{
+			$returnValue .= (empty($returnValue) ? "" : ",") . (string) $invalidObject;
 		}
 
 		return $returnValue;
 	}
 
 	/**
-	 * @param $newTimeSettingPeriod MobiscrollBusinessHours
+	 * Turns the delivery business hours (+ holidays) into invalid objects
+	 *
+	 * @return string
 	 */
-	private function RendererAddTimeSettingPeriod(MobiscrollBusinessHours $newTimeSettingPeriod)
+	public function RenderPickupBusinessHours(): string
 	{
-		if (empty($this->tempTimeSettingPeriods))
+		return $this->RenderExclusiveBusinessHours($this->pickupBusinessHours);
+	}
+
+	/**
+	 * Turns the delivery business hours (+ holidays) into invalid objects
+	 *
+	 * @return string
+	 */
+	public function RenderDeliveryBusinessHours(): string
+	{
+		return $this->RenderExclusiveBusinessHours($this->deliveryBusinessHours);
+	}
+
+	/**
+	 * Turns the pickup or delivery business hours (+ holidays) into invalid objects
+	 *
+	 * @param array|null $mobiscrollBusinessHours
+	 *
+	 * @return string
+	 */
+	private function RenderExclusiveBusinessHours(array $mobiscrollBusinessHours = null): string
+	{
+		$returnValue = "";
+		$bhs = array();
+
+		if ( ! empty($mobiscrollBusinessHours))
 		{
-			$this->tempTimeSettingPeriods[] = $newTimeSettingPeriod;
+			// pickup business hours
+			foreach ($mobiscrollBusinessHours as $invalidObject)
+			{
+				$this->MergeBusinessHours($bhs, $this->GetClosedAll());
+				$this->MergeBusinessHours($bhs, $invalidObject);
+			}
+		}
+		else if ($this->businessHours)
+		{
+			// regular business hours
+			foreach ($this->businessHours as $invalidObject)
+			{
+				$this->MergeBusinessHours($bhs, $invalidObject);
+			}
+		}
+
+		// add holidays
+		if ($this->businessHolidays)
+		{
+			foreach ($this->businessHolidays as $invalidObject)
+			{
+				$this->MergeBusinessHours($bhs, $invalidObject);
+			}
+		}
+
+		// render the invalid objects
+		if ( ! empty($bhs))
+		{
+			foreach ($bhs as $invalidObject)
+			{
+				$returnValue .= (empty($returnValue) ? "" : ",") . (string) $invalidObject;
+			}
+		}
+
+		return $returnValue;
+	}
+
+	/**
+	 *
+	 * @param MobiscrollBusinessHours[] $actual
+	 * @param $new MobiscrollBusinessHours
+	 *
+	 * @return void
+	 */
+	private function MergeBusinessHours(array &$actual, MobiscrollBusinessHours $new): void
+	{
+		if (empty($actual))
+		{
+			$actual = [$new];
 
 			return;
 		}
 
-		foreach ($this->tempTimeSettingPeriods as $existingTimeSettingPeriod)
+		foreach ($actual as $existingTimeSettingPeriod)
 		{
 			$existingFromDate = empty($existingTimeSettingPeriod->FromDate) ? DateTime::createFromFormat("Y-m-d", "1970-01-01") : clone $existingTimeSettingPeriod->FromDate;
 			$existingToDate = empty($existingTimeSettingPeriod->ToDate) ? DateTime::createFromFormat("Y-m-d", "3000-01-01") : clone $existingTimeSettingPeriod->ToDate;
-			if ($existingFromDate <= $newTimeSettingPeriod->FromDate && $existingToDate >= $newTimeSettingPeriod->ToDate)
+			if ($existingFromDate <= $new->FromDate && $existingToDate >= $new->ToDate)
 			{
 				$preTimeSettingPeriod = clone $existingTimeSettingPeriod;
 
 				// here comes an collision and we have to split
 				//$preTimeSettingPeriod = clone $existingTimeSettingPeriod;
-				$preTimeSettingPeriod->ToDate = clone $newTimeSettingPeriod->FromDate;
+				$preTimeSettingPeriod->ToDate = clone $new->FromDate;
 				$preTimeSettingPeriod->ToDate->sub(new \DateInterval("P1D"));
-				$this->tempTimeSettingPeriods[] = $preTimeSettingPeriod;
+				$actual[] = $preTimeSettingPeriod;
 
 				// set end of existing timesetting period
-				$existingTimeSettingPeriod->FromDate = clone $newTimeSettingPeriod->ToDate;
+				$existingTimeSettingPeriod->FromDate = clone $new->ToDate;
 				$existingTimeSettingPeriod->FromDate->add(new \DateInterval("P1D"));
 
 				// add the new one
-				$this->tempTimeSettingPeriods[] = $newTimeSettingPeriod;
+				$actual[] = $new;
 			}
 		}
+	}
+
+	/**
+	 * @return MobiscrollBusinessHours
+	 */
+	private function GetClosedAll(): MobiscrollBusinessHours
+	{
+		$bhs = array();
+		foreach (WeekDayUtilities::$weekdays as $weekday)
+		{
+			$bh = new \Sofa1\Core\Api\Dto\DateTime\BusinessHoursDto();
+			$bh->Day = ucwords($weekday);
+			$bh->IsOpen = false;
+			$bhs[] = $bh;
+		}
+		$businessHours = new MobiscrollBusinessHours();
+		$businessHours->AddBusinessHours($bhs);
+
+		return $businessHours;
 	}
 }

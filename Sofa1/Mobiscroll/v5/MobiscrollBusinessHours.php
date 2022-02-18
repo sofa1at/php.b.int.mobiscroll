@@ -10,9 +10,9 @@ use Sofa1\Core\Api\Model\DateTime\TimeSettingPeriodModel;
 class MobiscrollBusinessHours
 {
 
-	public \DateTime $FromDate;
+	public ?\DateTime $FromDate = null;
 
-	public \DateTime $ToDate;
+	public ?\DateTime $ToDate = null;
 
 	public array $OpenTimeSettingPeriodDays;
 	public array $ClosedTimeSettingPeriodDays;
@@ -62,6 +62,27 @@ class MobiscrollBusinessHours
 		}
 	}
 
+	public function __toString(): string
+	{
+		$returnValue = "";
+		if ( ! empty($this->OpenTimeSettingPeriodDays))
+		{
+			$returnValue = "{$returnValue}{$this->RenderRecurring($this->OpenTimeSettingPeriodDays, true)}";
+		}
+
+		if ( ! empty($this->ClosedTimeSettingPeriodDays))
+		{
+			$returnValue = "{$returnValue}{$this->RenderRecurring($this->ClosedTimeSettingPeriodDays, false)}";
+		}
+
+		if (empty($this->ClosedTimeSettingPeriodDays) && empty($this->OpenTimeSettingPeriodDays))
+		{
+			$returnValue = "{$returnValue}{$this->RenderBusinessHoliday()}";
+		}
+
+		return $returnValue;
+	}
+
 	private function RenderBusinessHoliday(): string
 	{
 		$returnValue = "";
@@ -87,6 +108,7 @@ class MobiscrollBusinessHours
 	 * @param bool $isOpen
 	 *
 	 * @return string
+	 * @throws \Exception
 	 */
 	private function RenderRecurring(array $timeSettingPeriodDays, bool $isOpen): string
 	{
@@ -110,6 +132,7 @@ class MobiscrollBusinessHours
 		}
 
 		$returnValue = "";
+		$invertWeekdays = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 		foreach ($hourSets as $key => $days)
 		{
 			$weekdays = "";
@@ -120,107 +143,75 @@ class MobiscrollBusinessHours
 				{
 					$weekdays = "{$weekdays},";
 				}
-				switch ($day->Day)
+				$shortWeekday = $this->GetWeekdayShort($day->Day);
+				$weekdays .= $shortWeekday;
+				$searchIndex = array_search(strtoupper($shortWeekday), $invertWeekdays);
+				if ($searchIndex !== false)
 				{
-					case 1:
-					case "Monday":
-						$weekdays = "{$weekdays}MO";
-						break;
-					case 2:
-					case "Tuesday":
-						$weekdays = "{$weekdays}TU";
-						break;
-					case 3:
-					case "Wednesday":
-						$weekdays = "{$weekdays}WE";
-						break;
-					case 4:
-					case "Thursday":
-						$weekdays = "{$weekdays}TH";
-						break;
-					case 5:
-					case "Friday":
-						$weekdays = "{$weekdays}FR";
-						break;
-					case 6:
-					case "Saturday":
-						$weekdays = "{$weekdays}SA";
-						break;
-					case 7:
-					case "Sunday":
-						$weekdays = "{$weekdays}SU";
-						break;
+					unset($invertWeekdays[$searchIndex]);
 				}
 			}
 
 			$split = preg_split("/;/", $key);
-			$from = ! empty($this->FromDate) ? ",from:'{$this->FromDate->format("Y-m-d")}'" : "";
-			$until = ! empty($this->ToDate) ? ",until:'{$this->ToDate->format("Y-m-d")}'" : "";
+
 
 			if ($isOpen)
 			{
+				$from = ! empty($this->FromDate) ? ",from:'{$this->FromDate->format("Y-m-d")}'" : "";
+				$until = ! empty($this->ToDate) ? ",until:'{$this->ToDate->format("Y-m-d")}'" : "";
 				$returnValue = sprintf("%s%s{start:'00:00',end:'%s',recurring:{repeat:'weekly',weekDays:'%s'%s%s}}", $returnValue, ! empty($returnValue) ? "," : "", $split[0], $weekdays, $from, $until);
 				$returnValue = sprintf("%s%s{start:'%s',end:'23:59',recurring:{repeat:'weekly',weekDays:'%s'%s%s}}", $returnValue, ! empty($returnValue) ? "," : "", $split[1], $weekdays, $from, $until);
 			}
 			else
 			{
+				$fromDate = $this->FromDate != null ? clone $this->FromDate : null;
+				$toDate = $this->ToDate != null ? clone $this->ToDate : null;
+				$from = ! empty($fromDate) ? ",from:'{$fromDate->sub(new \DateInterval("P1D"))->format("Y-m-d")}'" : "";
+				$until = ! empty($toDate) ? ",until:'{$toDate->add(new \DateInterval("P1D"))->format("Y-m-d")}'" : "";
 				$start = $split[0] == $split[1] ? "" : sprintf("start:'{%s}',", $split[0]);
 				$end = $split[0] == $split[1] ? "" : sprintf("end:'{%s}',", $split[1]);
 				$returnValue = sprintf("%s%s{%s%srecurring:{repeat:'weekly',weekDays:'%s'%s%s}}", $returnValue, ! empty($returnValue) ? "," : "", $start, $end, $weekdays, $from, $until);
 			}
+		}
 
+		if ( ! empty($invertWeekdays))
+		{
+			$returnValue = sprintf("%s%s{recurring:{repeat:'weekly',weekDays:'%s'%s%s}}", $returnValue, ! empty($returnValue) ? "," : "", implode(",", $invertWeekdays), $from, $until);
 		}
 
 		return $returnValue;
 	}
 
-	public function __toString(): string
+
+	/**
+	 * @throws \Exception
+	 */
+	private function GetWeekdayShort($weekday): string
 	{
-		$returnValue = "";
-		if ( ! empty($this->OpenTimeSettingPeriodDays))
+		switch (strtolower($weekday))
 		{
-			$returnValue = "{$returnValue}{$this->RenderRecurring($this->OpenTimeSettingPeriodDays, true)}";
+			case 1:
+			case "monday":
+				return "MO";
+			case 2:
+			case "tuesday":
+				return "TU";
+			case 3:
+			case "wednesday":
+				return "WE";
+			case 4:
+			case "thursday":
+				return "TH";
+			case 5:
+			case "friday":
+				return "FR";
+			case 6:
+			case "saturday":
+				return "SA";
+			case 7:
+			case "sunday":
+				return "SU";
 		}
-
-		if ( ! empty($this->ClosedTimeSettingPeriodDays))
-		{
-			$returnValue = "{$returnValue}{$this->RenderRecurring($this->ClosedTimeSettingPeriodDays, false)}";
-		}
-
-		if (empty($this->ClosedTimeSettingPeriodDays) && empty($this->OpenTimeSettingPeriodDays))
-		{
-			$returnValue = "{$returnValue}{$this->RenderBusinessHoliday()}";
-		}
-
-		return $returnValue;
+		throw  new \Exception("key {$weekday} not found");
 	}
-
-
-
-	//public function Render()
-	//{
-//		$hourSets = array();
-//		foreach ($this->timeSettingPeriod->TimeSettingPeriodDays as $day)
-//		{
-//			$hourSets["{$day->FromTime};{$day->ToTime}"][] = $day;
-//		}
-//
-//		$returnValue = "";
-//		foreach ($hourSets as $key => $days)
-//		{
-//			$weekdays = "";
-//			foreach ($days as $day)
-//			{
-//				/** @var TimeSettingPeriodDayModel $day */
-//				$offset = $day->Day - 1;
-//				$weekdays .= (empty($weekdays) ? "" : ",") . substr(strtoupper(date('D', strtotime("Monday + {$offset} Days"))), 0, 2);
-//			}
-//			$split = preg_split("/;/", $key);
-//			$from = ! empty($this->timeSettingPeriod->FromDate) ? ", from: '{$this->timeSettingPeriod->FromDate->format("Y-m-d")}'" : "";
-//			$until = ! empty($this->timeSettingPeriod->ToDate) ? ", until: '{$this->timeSettingPeriod->ToDate->format("Y-m-d")}'," : "";
-//			$returnValue .= "{start: '{$split[0]}',end: '$split[1]',recurring: { repeat: 'weekly', weekDays: '{$weekdays}' {$from} {$until}},";
-//		}
-//
-//		return $returnValue;
-	//}
 }

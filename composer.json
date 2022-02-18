@@ -13,7 +13,7 @@
   "homepage": "https://github.com/sofa1at/php.b.int.mobiscroll",
   "require": {
     "netresearch/jsonmapper": "^3",
-    "sofa1at/php.b.core": "1.9.*",
+    "sofa1at/php.b.core": "1.9.0.*",
     "scssphp/scssphp": "1.10.0"
   },
   "repositories": [
