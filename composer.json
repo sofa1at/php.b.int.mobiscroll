@@ -3,7 +3,7 @@
   "description": "converts sofa 1 businesshours and timetables to mobiscroll invalid/valid objects",
   "minimum-stability": "stable",
   "license": "proprietary",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "authors": [
     {
       "name": "zec",
@@ -13,7 +13,7 @@
   "homepage": "https://github.com/sofa1at/php.b.int.mobiscroll",
   "require": {
     "netresearch/jsonmapper": "^3",
-    "sofa1at/php.b.core": "1.9.*"
+    "sofa1at/php.b.core": "^1"
   },
   "repositories": [
     {
